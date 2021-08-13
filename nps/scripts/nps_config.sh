@@ -98,7 +98,6 @@ public_vkey=123
 # log level LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
 log_level=7
 #log_path=nps.log
-log_path=${LOG_FILE}
 
 #Whether to restrict IP access, true or false or ignore
 #ip_limit=true
@@ -126,12 +125,12 @@ web_key_file=conf/server.key
 auth_crypt_key =1234567812345678
 
 #allow_ports=9001-9009,10001,11000-12000
+allow_ports=${nps_common_allow_ports}
 
 #Web management multi-user login
-allow_user_login=false
-allow_user_register=false
+allow_user_login=${nps_common_allow_user_login}
+allow_user_register=${nps_common_allow_user_register}
 allow_user_change_username=false
-
 
 #extension
 allow_flow_limit=false
@@ -215,15 +214,6 @@ check_port(){
 open_port(){
 	local t_port
 	local u_port
-  "", 
-  "",
-  "nps_common_web_username",
-  "nps_common_web_password", 
-  "", 
-  "",
-  "nps_common_cron_time",
-  "nps_common_cron_hour_min"
-
 	[ "$(check_port tcp ${nps_common_bridge_port})" == "1" ] && iptables -I INPUT -p tcp --dport ${nps_common_bridge_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && t_port="${nps_common_bridge_port}"
 	[ "$(check_port tcp ${nps_common_web_port})" == "1" ] && iptables -I INPUT -p tcp --dport ${nps_common_web_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && t_port="${t_port} ${nps_common_web_port}"
 	[ "$(check_port tcp ${nps_common_http_proxy_port})" == "1" ] && iptables -I INPUT -p tcp --dport ${nps_common_http_proxy_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && t_port="${t_port} ${nps_common_http_proxy_port}"
@@ -232,6 +222,16 @@ open_port(){
 	[ "$(check_port udp ${nps_common_http_proxy_port})" == "1" ] && iptables -I INPUT -p udp --dport ${nps_common_web_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && u_port="${u_port} ${nps_common_web_port}"
 	[ "$(check_port udp ${nps_common_http_proxy_port})" == "1" ] && iptables -I INPUT -p udp --dport ${nps_common_http_proxy_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && u_port="${u_port} ${nps_common_http_proxy_port}"
 	[ "$(check_port udp ${nps_common_https_proxy_port})" == "1" ] && iptables -I INPUT -p udp --dport ${nps_common_https_proxy_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && u_port="${u_port} ${nps_common_https_proxy_port}"
+  # 动态设置 tcp udp
+	temp_ports="${nps_common_allow_ports//-/:}"
+  IFS="," 
+  set -- $temp_ports 
+  for temp_port 
+  do 
+    # echo "$val" 
+    [ "$(check_port tcp ${temp_port})" == "1" ] && iptables -I INPUT -p tcp --dport ${temp_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && t_port="${t_port} ${temp_port}"
+	  [ "$(check_port udp ${temp_port})" == "1" ] && iptables -I INPUT -p udp --dport ${temp_port} -j ACCEPT >/tmp/ali_ntp.txt 2>&1 && u_port="${u_port} ${temp_port}"
+  done
 	[ -n "${t_port}" ] && echo_date "开启TCP端口：${t_port}"
 	[ -n "${u_port}" ] && echo_date "开启UDP端口：${u_port}"
 }
@@ -247,7 +247,17 @@ close_port(){
 	[ "$(check_port udp ${nps_common_web_port})" == "0" ] && iptables -D INPUT -p udp --dport ${nps_common_web_port} -j ACCEPT >/dev/null 2>&1 && u_port="${u_port} ${nps_common_web_port}"
 	[ "$(check_port udp ${nps_common_http_proxy_port})" == "0" ] && iptables -D INPUT -p udp --dport ${nps_common_http_proxy_port} -j ACCEPT >/dev/null 2>&1 && u_port="${u_port} ${nps_common_http_proxy_port}"
 	[ "$(check_port udp ${nps_common_https_proxy_port})" == "0" ] && iptables -D INPUT -p udp --dport ${nps_common_https_proxy_port} -j ACCEPT >/dev/null 2>&1 && u_port="${u_port} ${nps_common_https_proxy_port}"
-	[ -n "${t_port}" ] && echo_date "关闭TCP端口：${t_port}"
+	# 动态设置 tcp udp
+	temp_ports="${nps_common_allow_ports//-/:}"
+  IFS="," 
+  set -- $temp_ports 
+  for temp_port 
+  do 
+    # echo "$val" 
+	  [ "$(check_port tcp ${temp_port})" == "0" ] && iptables -D INPUT -p tcp --dport ${temp_port} -j ACCEPT >/dev/null 2>&1 && t_port="${t_port} ${temp_port}"
+	  [ "$(check_port udp ${temp_port})" == "0" ] && iptables -D INPUT -p udp --dport ${temp_port} -j ACCEPT >/dev/null 2>&1 && u_port="${u_port} ${temp_port}"
+  done
+  [ -n "${t_port}" ] && echo_date "关闭TCP端口：${t_port}"
 	[ -n "${u_port}" ] && echo_date "关闭UDP端口：${u_port}"
 }
 # 5秒后关闭

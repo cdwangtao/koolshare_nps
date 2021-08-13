@@ -80,9 +80,13 @@ var params_input = [
   "nps_common_web_password", 
   "nps_common_http_proxy_port", 
   "nps_common_https_proxy_port",
+  "nps_common_allow_ports",
+  "nps_common_allow_user_login",
+  "nps_common_allow_user_register",
   "nps_common_cron_time",
   "nps_common_cron_hour_min"
 ];
+
 var params_check = ["nps_enable"];
 var  refresh_flag;
 var count_down;
@@ -393,7 +397,7 @@ function get_log(action){
                           <div id="nps_status"><i><span id="status">获取中...</span></i></div>
                         </td>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(1)">端口</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(1)">客户端连接端口</a></th>
                           <td>
                             <input type="text" class="input_ss_table" value="" id="nps_common_bridge_port" name="nps_common_bridge_port" maxlength="5" value="" placeholder=""/>
                           </td>
@@ -417,18 +421,41 @@ function get_log(action){
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(5)">http端口</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(5)">HTTP 端口</a></th>
                           <td>
                             <input type="text" class="input_ss_table" value="" id="nps_common_http_proxy_port" name="nps_common_http_proxy_port" maxlength="5" value="" placeholder=""/>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(6)">https端口</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(6)">HTTPS 端口</a></th>
                           <td>
                             <input type="text" class="input_ss_table" value="" id="nps_common_https_proxy_port" name="nps_common_https_proxy_port" maxlength="5" value="" placeholder=""/>
                           </td>
                         </tr>
-
+                        <tr>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(7)">允许端口</a></th>
+                          <td>
+                            <input type="text" class="input_ss_table" value="" id="nps_common_allow_ports" name="nps_common_allow_ports" maxlength="50" value="" placeholder=""/>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(8)">允许多用户-用户登录</a></th>
+                          <td>
+                            <select id="nps_common_allow_user_login" name="nps_common_allow_user_login" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
+                              <option value="true">开启</option>
+                              <option value="false">关闭</option>
+                            </select>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">允许多用户-用户注册</a></th>
+                          <td>
+                            <select id="nps_common_allow_user_register" name="nps_common_allow_user_register" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
+                              <option value="true">开启</option>
+                              <option value="false">关闭</option>
+                            </select>
+                          </td>
+                        </tr>
                         <!-- 
                         <tr>
                           <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(1)">Dashboard port</a></th>
@@ -538,7 +565,7 @@ function get_log(action){
                         -->
 
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(7)">定时注册服务</a>(<i>0为关闭</i>)</th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(10)">定时注册服务</a>(<i>0为关闭</i>)</th>
                           <td>
                             每
                             <input type="text" id="nps_common_cron_time" name="nps_common_cron_time" class="input_ss_table" style="width:30px" value="30" placeholder="" />

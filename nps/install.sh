@@ -1,5 +1,5 @@
 #!/bin/sh
-!source /koolshare/scripts/base.sh
+source /koolshare/scripts/base.sh
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 MODEL=
 UI_TYPE=ASUSWRT
@@ -205,15 +205,43 @@ install_now(){
   local VERSION=$(cat $DIR/version)
   dbus set ${module}_version="${VERSION}"
   dbus set ${module}_client_version=$(/koolshare/bin/${module} --version)
-  dbus set ${module}_common_cron_hour_min="hour"
-  dbus set ${module}_common_cron_time="12"
 
-  dbus set ${module}_common_bridge_port="85"
-  dbus set ${module}_common_web_port="86"
-  dbus set ${module}_common_web_username="admin"
-  dbus set ${module}_common_web_password="test123"
-  dbus set ${module}_common_http_proxy_port="55"
-  dbus set ${module}_common_https_proxy_port="66"
+  # 如果配置不存在 那么设置默认值
+  if [ "$(dbus get ${module}_common_bridge_port)" == "" ];then
+    dbus set ${module}_common_bridge_port="85"
+  fi
+  if [ "$(dbus get ${module}_common_web_port)" == "" ];then
+    dbus set ${module}_common_web_port="86"
+  fi
+  if [ "$(dbus get ${module}_common_web_username)" == "" ];then
+    dbus set ${module}_common_web_username="admin"
+  fi
+  if [ "$(dbus get ${module}_common_web_password)" == "" ];then
+    dbus set ${module}_common_web_password="test123"
+  fi
+  if [ "$(dbus get ${module}_common_http_proxy_port)" == "" ];then
+    dbus set ${module}_common_http_proxy_port="55"
+  fi
+  if [ "$(dbus get ${module}_common_https_proxy_port)" == "" ];then
+    dbus set ${module}_common_https_proxy_port="66"
+  fi
+  if [ "$(dbus get ${module}_common_allow_ports)" == "" ];then
+    dbus set ${module}_common_allow_ports="9001-9009,10001,11000-12000"
+  fi
+  if [ "$(dbus get ${module}_common_allow_user_login)" == "" ];then
+    dbus set ${module}_common_allow_user_login="false"
+  fi
+  if [ "$(dbus get ${module}_common_allow_user_register)" == "" ];then
+    dbus set ${module}_common_allow_user_register="false"
+  fi
+
+  if [ "$(dbus get ${module}_common_cron_hour_min)" == "" ];then
+    dbus set ${module}_common_cron_hour_min="hour"
+  fi
+  if [ "$(dbus get ${module}_common_cron_time)" == "" ];then
+    dbus set ${module}_common_cron_time="12"
+  fi
+  
 
   # 10.安装完毕 重启插件
   # re-enable
