@@ -170,8 +170,8 @@ install_now(){
   if [ ! -d "/etc/${module}/" ];then
     echo_date "文件[/etc/${module}/]不存在, 开始拷贝[/koolshare/res/${module}/]到[/etc/]"
     # mkdir -p /etc/nps/
-	# cp -rf /koolshare/res/${module}/* /etc/nps/
-	cp -rf /koolshare/res/${module}/ /etc/
+	  # cp -rf /koolshare/res/${module}/* /etc/nps/
+	  cp -rf /koolshare/res/${module}/ /etc/
   fi
   pause "拷贝资源完成"
 
@@ -239,7 +239,13 @@ install_now(){
     dbus set ${module}_common_cron_hour_min="hour"
   fi
   if [ "$(dbus get ${module}_common_cron_time)" == "" ];then
-    dbus set ${module}_common_cron_time="12"
+    dbus set ${module}_common_cron_time="0"
+  fi
+  if [ "$(dbus get ${module}_common_cron2_hour_min)" == "" ];then
+    dbus set ${module}_common_cron2_hour_min="min"
+  fi
+  if [ "$(dbus get ${module}_common_cron2_time)" == "" ];then
+    dbus set ${module}_common_cron2_time="5"
   fi
   
 
@@ -257,12 +263,12 @@ install_now(){
 }
 
 install(){
-  if [ ! -d "/tmp/${module}/" ];then
-    echo_date "文件夹[/tmp/${module}/]不存在, 即将开始拷贝[/tmp/home/root/${module}/]到[/tmp/]"
-    # mkdir -p /tmp/nps/
-    # cp -rf /tmp/home/root/${module}/* /tmp/nps/
-	cp -rf /tmp/home/root/${module}/ /tmp/
-  fi
+  # if [ ! -d "/tmp/${module}/" ];then
+  #   echo_date "文件夹[/tmp/${module}/]不存在, 即将开始拷贝[/tmp/home/root/${module}/]到[/tmp/]"
+  #   # mkdir -p /tmp/nps/
+  #   # cp -rf /tmp/home/root/${module}/* /tmp/nps/
+  # 	cp -rf /tmp/home/root/${module}/ /tmp/
+  # fi
   # 1.获取路由器机型名称: 如:RT-AX86U
   get_model
   # 2.获取固件类型 如: FW_TYPE_CODE="1" FW_TYPE_NAME="华硕官方固件"

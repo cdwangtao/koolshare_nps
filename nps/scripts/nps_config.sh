@@ -2,7 +2,7 @@
 
 source /koolshare/scripts/base.sh
 eval $(dbus export nps_)
-CONF_FILE=/koolshare/configs/nps.conf
+CONF_FILE=/koolshare/configs/nps/nps.conf
 CONF_REAL_FILE=/etc/nps/conf/nps.conf
 LOG_FILE=/tmp/upload/nps_log.txt
 LOCK_FILE=/var/lock/nps.lock
@@ -67,6 +67,9 @@ onstart() {
 	echo_date "当前插件nps主程序版本号：${nps_client_version}"
 
 	# nps配置文件
+  if [ ! -d "/koolshare/configs/nps/" ];then
+    mkdir -p "/koolshare/configs/nps/"
+  fi
 	echo_date "生成nps配置文件到 ${CONF_FILE}"
 	cat >${CONF_FILE} <<-EOF
 appname = nps
@@ -156,18 +159,44 @@ http_add_origin_header=false
 disconnect_timeout=60	
 	EOF
   # 拷贝配置文件到 nps实际读取的 真实的配置文件位置
+  if [ ! -d "/etc/nps/conf/" ];then
+    echo_date "文件[/etc/nps/conf/]不存在, 开始拷贝[/koolshare/res/nps/conf/]到[/etc/nps/]"
+    mkdir -p "/etc/nps/conf/"
+	  cp -rf /koolshare/res/nps/conf/ /etc/nps/
+  fi
+  if [ ! -d "/etc/nps/web/" ];then
+    echo_date "文件[/etc/nps/web/]不存在, 开始拷贝[/koolshare/res/nps/web/]到[/etc/nps/]"
+    mkdir -p "/etc/nps/web/"
+	  cp -rf /koolshare/res/nps/web/ /etc/nps/
+  fi
   cp -rf ${CONF_FILE} ${CONF_REAL_FILE}
+  cp -rf /koolshare/configs/nps/clients.json /etc/nps/conf/clients.json
+  cp -rf /koolshare/configs/nps/hosts.json /etc/nps/conf/hosts.json
+  cp -rf /koolshare/configs/nps/tasks.json /etc/nps/conf/tasks.json
 
-	# 定时任务
+	# 定时任务 1
 	if [ "${nps_common_cron_time}" == "0" ]; then
 		cru d nps_monitor >/dev/null 2>&1
 	else
 		if [ "${nps_common_cron_hour_min}" == "min" ]; then
 			echo_date "设置定时任务：每隔${nps_common_cron_time}分钟注册一次nps服务..."
-			cru a nps_monitor "*/"${nps_common_cron_time}" * * * * /bin/sh /koolshare/scripts/nps_config.sh"
+			cru a nps_monitor "*/"${nps_common_cron_time}" * * * * /bin/sh /koolshare/scripts/nps_config.sh restart"
 		elif [ "${nps_common_cron_hour_min}" == "hour" ]; then
 			echo_date "设置定时任务：每隔${nps_common_cron_time}小时注册一次nps服务..."
-			cru a nps_monitor "0 */"${nps_common_cron_time}" * * * /bin/sh /koolshare/scripts/nps_config.sh"
+			cru a nps_monitor "0 */"${nps_common_cron_time}" * * * /bin/sh /koolshare/scripts/nps_config.sh restart"
+		fi
+		echo_date "定时任务设置完成！"
+	fi
+  # 定时任务 2 定时备份配置文件
+	if [ "${nps_common_cron1_time}" == "0" ]; then
+		cru d nps_monitor >/dev/null 2>&1
+	else
+		if [ "${nps_common_cron1_hour_min}" == "min" ]; then
+			echo_date "设置定时任务：每隔${nps_common_cron2_time}分钟备份一次nps配置文件..."
+			cru a nps_monitor "*/"${nps_common_cron2_time}" * * * * /bin/sh /koolshare/scripts/nps_config.sh backconf"
+		elif [ "${nps_common_cron2_hour_min}" == "hour" ]; then
+			echo_date "设置定时任务：每隔${nps_common_cron2_time}小时备份一次nps配置文件..."
+			cru a nps_monitor "0 */"${nps_common_cron2_time}" * * * /bin/sh /koolshare/scripts/nps_config.sh backconf"
 		fi
 		echo_date "定时任务设置完成！"
 	fi
@@ -283,9 +312,15 @@ stop() {
 		killall nps >/dev/null 2>&1
 	fi
 
+  # 删除定时任务1
 	if [ -n "$(cru l|grep nps_monitor)" ];then
-		echo_date "删除定时任务..."
+		echo_date "删除定时任务1..."
 		cru d nps_monitor >/dev/null 2>&1
+	fi
+  # 删除定时任务2
+	if [ -n "$(cru l|grep nps_monitor2)" ];then
+		echo_date "删除定时任务2..."
+		cru d nps_monitor2 >/dev/null 2>&1
 	fi
 
 	if [ -L "/koolshare/init.d/N95nps.sh" ];then
@@ -294,6 +329,13 @@ stop() {
    	fi
     # 关闭端口
     close_port
+}
+# 执行备份配置文件
+onbackconf() {
+  echo_date "执行备份nps配置文件"
+  cp -rf /etc/nps/conf/clients.json /koolshare/configs/nps/clients.json
+  cp -rf /etc/nps/conf/hosts.json /koolshare/configs/nps/hosts.json
+  cp -rf /etc/nps/conf/tasks.json /koolshare/configs/nps/tasks.json
 }
 
 # 功能
@@ -327,6 +369,13 @@ start_nat)
 	set_lock
 	if [ "${nps_enable}" == "1" ]; then
 		onstart
+	fi
+	unset_lock
+	;;
+ backconf)
+  set_lock
+	if [ "${nps_enable}" == "1" ]; then
+		onbackconf
 	fi
 	unset_lock
 	;;

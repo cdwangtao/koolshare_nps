@@ -84,7 +84,9 @@ var params_input = [
   "nps_common_allow_user_login",
   "nps_common_allow_user_register",
   "nps_common_cron_time",
-  "nps_common_cron_hour_min"
+  "nps_common_cron_hour_min",
+  "nps_common_cron2_time",
+  "nps_common_cron2_hour_min"
 ];
 
 var params_check = ["nps_enable"];
@@ -156,8 +158,13 @@ function save() {
     || !E(nps_common_web_password).value
     || !E(nps_common_http_proxy_port).value
     || !E(nps_common_https_proxy_port).value
+    || !E(nps_common_allow_ports).value
+    || !E(nps_common_allow_user_login).value
+    || !E(nps_common_allow_user_register).value
     || !E(nps_common_cron_time).value
     || !E(nps_common_cron_hour_min).value
+    || !E(nps_common_cron2_time).value
+    || !E(nps_common_cron2_hour_min).value
   ){
     alert("提交的表单不能为空!");
     return false;
@@ -563,9 +570,8 @@ function get_log(action){
                           </td>
                         </tr>
                         -->
-
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(10)">定时注册服务</a>(<i>0为关闭</i>)</th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(10)">定时重启服务</a>(<i>0为关闭</i>)</th>
                           <td>
                             每
                             <input type="text" id="nps_common_cron_time" name="nps_common_cron_time" class="input_ss_table" style="width:30px" value="30" placeholder="" />
@@ -573,7 +579,19 @@ function get_log(action){
                               <option value="min" selected="selected">分钟</option>
                               <option value="hour">小时</option>
                             </select>
-                            重新注册一次服务
+                            重启一次服务
+                          </td>
+                        </tr>
+                        <tr>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(11)">定时备份配置(建议开启)</a>(<i>0为关闭</i>)</th>
+                          <td>
+                            每
+                            <input type="text" id="nps_common_cron2_time" name="nps_common_cron2_time" class="input_ss_table" style="width:30px" value="30" placeholder="" />
+                            <select id="nps_common_cron2_hour_min" name="nps_common_cron2_hour_min" style="width:60px;vertical-align: middle;" class="input_option">
+                              <option value="min" selected="selected">分钟</option>
+                              <option value="hour">小时</option>
+                            </select>
+                            备份一次配置 (解决/nps/etc/配置文件重启丢失的问题)
                           </td>
                         </tr>
                       </table>
