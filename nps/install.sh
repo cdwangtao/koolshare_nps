@@ -263,14 +263,9 @@ install_now(){
 }
 
 install(){
-  # if [ ! -d "/tmp/${module}/" ];then
-  #   echo_date "文件夹[/tmp/${module}/]不存在, 即将开始拷贝[/tmp/home/root/${module}/]到[/tmp/]"
-  #   # mkdir -p /tmp/nps/
-  #   # cp -rf /tmp/home/root/${module}/* /tmp/nps/
-  # 	cp -rf /tmp/home/root/${module}/ /tmp/
-  # fi
   # 1.获取路由器机型名称: 如:RT-AX86U
   get_model
+  
   # 2.获取固件类型 如: FW_TYPE_CODE="1" FW_TYPE_NAME="华硕官方固件"
   get_fw_type
   

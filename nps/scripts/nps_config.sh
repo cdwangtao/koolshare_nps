@@ -166,17 +166,21 @@ disconnect_timeout=60
   # 拷贝1.配置文件(conf)
   if [ ! -d "${CONF_REAL_DIR}/" ];then
     echo_date "nps固定的配置目录(conf)[${CONF_REAL_DIR}/]不存在, 开始创建[${CONF_REAL_DIR}/]目录，并拷贝[${CONF_BAKALL_DIR}/*]到[${CONF_REAL_DIR}/]"
-    mkdir -p "${CONF_REAL_DIR}"
-    cp -rf "${CONF_BAKALL_DIR}/*" "${CONF_REAL_DIR}/"
+    mkdir -p ${CONF_REAL_DIR}/
+    cp -rf ${CONF_BAKALL_DIR}/* ${CONF_REAL_DIR}/
 	  # cp -rf /koolshare/res/nps/conf/ /etc/nps/
   fi
   # 拷贝2.资源文件(web)
   if [ ! -d "${WEB_REAL_DIR}/" ];then
-    echo_date "nps固定的配置目录(web)[${WEB_REAL_DIR}/]不存在, 开始创建[${WEB_REAL_DIR}/]目录，并拷贝[${WEB_BAK_DIR}/*]到[${WEB_REAL_DIR}/]"
-    mkdir -p "${WEB_REAL_DIR}/"
-    cp -rf "${WEB_BAK_DIR}/*" "${WEB_REAL_DIR}/"
+    echo_data "nps固定的配置目录(web)[${WEB_REAL_DIR}/]不存在, 开始创建[${WEB_REAL_DIR}/]目录，并拷贝[${WEB_BAK_DIR}/*]到[${WEB_REAL_DIR}/]"
+    mkdir -p ${WEB_REAL_DIR}/
+    cp -rf ${WEB_BAK_DIR}/*  ${WEB_REAL_DIR}/
 	  # cp -rf /koolshare/res/nps/web/ /etc/nps/
   fi
+  if [ ! -f "${WEB_REAL_DIR}/views/index/index.html" ];then
+    echo_data "nps固定的配置文件(web)[${WEB_BAK_DIR}/views/index/index.html]不存在，拷贝[${WEB_BAK_DIR}/*]到[${WEB_REAL_DIR}/]"
+    cp -rf ${WEB_BAK_DIR}/* ${WEB_REAL_DIR}/
+	fi
   # wt增强1.还原配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
   on_restore_conf 0
 
