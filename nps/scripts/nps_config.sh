@@ -1,13 +1,17 @@
 #!/bin/sh
-
 source /koolshare/scripts/base.sh
 eval $(dbus export nps_)
-CONF_FILE=/koolshare/configs/nps/nps.conf
-CONF_REAL_FILE=/etc/nps/conf/nps.conf
+# nps conf的备份目录 固定目录[/etc/nps/conf]
+CONF_BAKALL_DIR=/koolshare/res/nps/conf
+CONF_BAK_DIR=/koolshare/configs/nps
+CONF_REAL_DIR=/etc/nps/conf
+# nps web的备份目录  固定目录[/etc/nps/web]
+WEB_BAK_DIR=/koolshare/res/nps/web
+WEB_REAL_DIR=/etc/nps/web
 LOG_FILE=/tmp/upload/nps_log.txt
 LOCK_FILE=/var/lock/nps.lock
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
-true > $LOG_FILE
+# true > $LOG_FILE
 
 # 设置 锁?
 set_lock() {
@@ -66,12 +70,13 @@ onstart() {
 	fi
 	echo_date "当前插件nps主程序版本号：${nps_client_version}"
 
-	# nps配置文件
-  if [ ! -d "/koolshare/configs/nps/" ];then
-    mkdir -p "/koolshare/configs/nps/"
+	# 判断 nps 配置的备份目录是否存在 不存在则创建
+  if [ ! -d "${CONF_BAK_DIR}/" ];then
+    mkdir -p "${CONF_BAK_DIR}/"
   fi
-	echo_date "生成nps配置文件到 ${CONF_FILE}"
-	cat >${CONF_FILE} <<-EOF
+  # 生成 nps 配置文件
+	echo_date "生成nps配置文件到 ${CONF_BAK_DIR}/nps.conf"
+	cat >"${CONF_BAK_DIR}/nps.conf" <<-EOF
 appname = nps
 #Boot mode(dev|pro)
 runmode = pro
@@ -158,44 +163,45 @@ http_add_origin_header=false
 #client disconnect timeout
 disconnect_timeout=60	
 	EOF
-  # 拷贝配置文件到 nps实际读取的 真实的配置文件位置
-  if [ ! -d "/etc/nps/conf/" ];then
-    echo_date "文件[/etc/nps/conf/]不存在, 开始拷贝[/koolshare/res/nps/conf/]到[/etc/nps/]"
-    mkdir -p "/etc/nps/conf/"
-	  cp -rf /koolshare/res/nps/conf/ /etc/nps/
+  # 拷贝1.配置文件(conf)
+  if [ ! -d "${CONF_REAL_DIR}/" ];then
+    echo_date "nps固定的配置目录(conf)[${CONF_REAL_DIR}/]不存在, 开始创建[${CONF_REAL_DIR}/]目录，并拷贝[${CONF_BAKALL_DIR}/*]到[${CONF_REAL_DIR}/]"
+    mkdir -p "${CONF_REAL_DIR}"
+    cp -rf "${CONF_BAKALL_DIR}/*" "${CONF_REAL_DIR}/"
+	  # cp -rf /koolshare/res/nps/conf/ /etc/nps/
   fi
-  if [ ! -d "/etc/nps/web/" ];then
-    echo_date "文件[/etc/nps/web/]不存在, 开始拷贝[/koolshare/res/nps/web/]到[/etc/nps/]"
-    mkdir -p "/etc/nps/web/"
-	  cp -rf /koolshare/res/nps/web/ /etc/nps/
+  # 拷贝2.资源文件(web)
+  if [ ! -d "${WEB_REAL_DIR}/" ];then
+    echo_date "nps固定的配置目录(web)[${WEB_REAL_DIR}/]不存在, 开始创建[${WEB_REAL_DIR}/]目录，并拷贝[${WEB_BAK_DIR}/*]到[${WEB_REAL_DIR}/]"
+    mkdir -p "${WEB_REAL_DIR}/"
+    cp -rf "${WEB_BAK_DIR}/*" "${WEB_REAL_DIR}/"
+	  # cp -rf /koolshare/res/nps/web/ /etc/nps/
   fi
-  cp -rf ${CONF_FILE} ${CONF_REAL_FILE}
-  cp -rf /koolshare/configs/nps/clients.json /etc/nps/conf/clients.json
-  cp -rf /koolshare/configs/nps/hosts.json /etc/nps/conf/hosts.json
-  cp -rf /koolshare/configs/nps/tasks.json /etc/nps/conf/tasks.json
+  # wt增强1.还原配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
+  on_restore_conf 0
 
 	# 定时任务 1
 	if [ "${nps_common_cron_time}" == "0" ]; then
 		cru d nps_monitor >/dev/null 2>&1
 	else
 		if [ "${nps_common_cron_hour_min}" == "min" ]; then
-			echo_date "设置定时任务：每隔${nps_common_cron_time}分钟注册一次nps服务..."
+			echo_date "设置定时任务：每隔${nps_common_cron_time}分钟重启nps服务..."
 			cru a nps_monitor "*/"${nps_common_cron_time}" * * * * /bin/sh /koolshare/scripts/nps_config.sh restart"
 		elif [ "${nps_common_cron_hour_min}" == "hour" ]; then
-			echo_date "设置定时任务：每隔${nps_common_cron_time}小时注册一次nps服务..."
+			echo_date "设置定时任务：每隔${nps_common_cron_time}小时重启nps服务..."
 			cru a nps_monitor "0 */"${nps_common_cron_time}" * * * /bin/sh /koolshare/scripts/nps_config.sh restart"
 		fi
 		echo_date "定时任务设置完成！"
 	fi
   # 定时任务 2 定时备份配置文件
-	if [ "${nps_common_cron1_time}" == "0" ]; then
+	if [ "${nps_common_cron2_time}" == "0" ]; then
 		cru d nps_monitor >/dev/null 2>&1
 	else
-		if [ "${nps_common_cron1_hour_min}" == "min" ]; then
-			echo_date "设置定时任务：每隔${nps_common_cron2_time}分钟备份一次nps配置文件..."
+		if [ "${nps_common_cron2_hour_min}" == "min" ]; then
+			echo_date "设置定时任务：每隔${nps_common_cron2_time}分钟备份一次nps配置文件(如果配置文件有变化)..."
 			cru a nps_monitor "*/"${nps_common_cron2_time}" * * * * /bin/sh /koolshare/scripts/nps_config.sh backconf"
 		elif [ "${nps_common_cron2_hour_min}" == "hour" ]; then
-			echo_date "设置定时任务：每隔${nps_common_cron2_time}小时备份一次nps配置文件..."
+			echo_date "设置定时任务：每隔${nps_common_cron2_time}小时备份一次nps配置文件(如果配置文件有变化)..."
 			cru a nps_monitor "0 */"${nps_common_cron2_time}" * * * /bin/sh /koolshare/scripts/nps_config.sh backconf"
 		fi
 		echo_date "定时任务设置完成！"
@@ -306,12 +312,13 @@ close_in_five() {
 }
 # 停止
 stop() {
+  # wt增强2.备份配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
+  on_back_conf 1
 	# 关闭nps进程
 	if [ -n "$(pidof nps)" ];then
 		echo_date "停止nps主进程，pid：$(pidof nps)"
 		killall nps >/dev/null 2>&1
 	fi
-
   # 删除定时任务1
 	if [ -n "$(cru l|grep nps_monitor)" ];then
 		echo_date "删除定时任务1..."
@@ -322,20 +329,56 @@ stop() {
 		echo_date "删除定时任务2..."
 		cru d nps_monitor2 >/dev/null 2>&1
 	fi
-
+  # 删除开机自启动
 	if [ -L "/koolshare/init.d/N95nps.sh" ];then
-		echo_date "删除nat触发..."
-   		rm -rf /koolshare/init.d/N95nps.sh >/dev/null 2>&1
-   	fi
-    # 关闭端口
-    close_port
+    echo_date "删除nat触发..."
+    rm -rf /koolshare/init.d/N95nps.sh >/dev/null 2>&1
+  fi
+  # 关闭端口
+  close_port
 }
-# 执行备份配置文件
-onbackconf() {
-  echo_date "执行备份nps配置文件"
-  cp -rf /etc/nps/conf/clients.json /koolshare/configs/nps/clients.json
-  cp -rf /etc/nps/conf/hosts.json /koolshare/configs/nps/hosts.json
-  cp -rf /etc/nps/conf/tasks.json /koolshare/configs/nps/tasks.json
+# wt增强1.还原配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
+on_restore_conf() {
+  if [ "${1}" == "1" ]; then
+		compareTwoFileTimesAndCopy "${CONF_BAK_DIR}/nps.conf"     "${CONF_REAL_DIR}/nps.conf"     "还原"
+    compareTwoFileTimesAndCopy "${CONF_BAK_DIR}/clients.json" "${CONF_REAL_DIR}/clients.json" "还原"
+    compareTwoFileTimesAndCopy "${CONF_BAK_DIR}/hosts.json"   "${CONF_REAL_DIR}/hosts.json"   "还原"
+    compareTwoFileTimesAndCopy "${CONF_BAK_DIR}/tasks.json"   "${CONF_REAL_DIR}/tasks.json"   "还原"
+	else
+    echo_date "还原配置文件 nps.conf clients.json hosts.json tasks.json"
+		cp -rf "${CONF_BAK_DIR}/nps.conf"     "${CONF_REAL_DIR}/nps.conf"
+    cp -rf "${CONF_BAK_DIR}/clients.json" "${CONF_REAL_DIR}/clients.json"
+    cp -rf "${CONF_BAK_DIR}/hosts.json"   "${CONF_REAL_DIR}/hosts.json"
+    cp -rf "${CONF_BAK_DIR}/tasks.json"   "${CONF_REAL_DIR}/tasks.json"
+	fi
+}
+# wt增强2.备份配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
+on_back_conf() {
+  if [ "${1}" == "1" ]; then
+		compareTwoFileTimesAndCopy "${CONF_REAL_DIR}/nps.conf"     "${CONF_BAK_DIR}/nps.conf"     "备份"
+    compareTwoFileTimesAndCopy "${CONF_REAL_DIR}/clients.json" "${CONF_BAK_DIR}/clients.json" "备份"
+    compareTwoFileTimesAndCopy "${CONF_REAL_DIR}/hosts.json"   "${CONF_BAK_DIR}/hosts.json"   "备份"
+    compareTwoFileTimesAndCopy "${CONF_REAL_DIR}/tasks.json"   "${CONF_BAK_DIR}/tasks.json"   "备份"
+	else
+    echo_date "备份配置文件 nps.conf clients.json hosts.json tasks.json"
+		cp -rf "${CONF_REAL_DIR}/nps.conf"     "${CONF_BAK_DIR}/nps.conf"
+    cp -rf "${CONF_REAL_DIR}/clients.json" "${CONF_BAK_DIR}/clients.json"
+    cp -rf "${CONF_REAL_DIR}/hosts.json"   "${CONF_BAK_DIR}/hosts.json"
+    cp -rf "${CONF_REAL_DIR}/tasks.json"   "${CONF_BAK_DIR}/tasks.json"
+	fi
+}
+# wt增强3 比较两个文件时间并复制 
+compareTwoFileTimesAndCopy() {
+  fileTimes1=$(date +%s -r ${1})
+  fileTimes2=$(date +%s -r ${2})
+  if [[ "${fileTimes1}" \> "${fileTimes2}" ]];then
+    # echo_date "比较时间${3}配置文件 拷贝[${1}]到[${2}] 时间(${fileTimes1})大于时间(${fileTimes2})"
+    echo_date "比较时间${3}配置文件 拷贝[${1}]到[${2}] 时间(${fileTimes1})大于时间(${fileTimes2})" | tee -a $LOG_FILE
+    cp -rf "${1}" "${2}"
+  fi
+  # else
+  #   echo "文件1[${1}]的时间(${fileTimes1}) 小于 文件2[${2}的时间(${fileTimes2})"
+  # fi
 }
 
 # 功能
@@ -375,7 +418,8 @@ start_nat)
  backconf)
   set_lock
 	if [ "${nps_enable}" == "1" ]; then
-		onbackconf
+		# wt增强2.备份配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
+    on_back_conf 1
 	fi
 	unset_lock
 	;;
@@ -385,6 +429,8 @@ esac
 case $2 in
 web_submit)
 	set_lock
+  # 清空日志
+  true > $LOG_FILE
 	http_response "$1"
 	if [ "${nps_enable}" == "1" ]; then
 		stop | tee -a $LOG_FILE

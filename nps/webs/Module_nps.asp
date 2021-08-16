@@ -385,9 +385,10 @@ function get_log(action){
                               </label>
                             </div>
                             <div style="float: right;margin-top:5px;margin-right:30px;">
-                              <a type="button" href="https://github.com/ehang-io/nps" target="_blank" class="ks_btn" style="cursor: pointer;border:none;" >nps开源项目</a>
-                              <!--<a type="button" href="https://koolshare.cn/thread-65379-1-1.html" target="_blank" class="ks_btn" style="cursor: pointer;margin-left:5px;border:none" >服务器搭建教程</a>-->
-                              <!--<a type="button" href="https://raw.githubusercontent.com/koolshare/rogsoft/master/nps/Changelog.txt" target="_blank" class="ks_btn" style="cursor: pointer;margin-left:5px;border:none" >更新日志</a>-->
+                              <a type="button" href="https://github.com/cdwangtao/koolshare_nps" target="_blank" class="ks_btn" style="cursor: pointer;border:none;" >nps插件</a>
+                              <a type="button" href="https://github.com/ehang-io/nps" target="_blank" class="ks_btn" style="cursor: pointer;border:none;" >nps项目</a>
+                              <a type="button" href="https://ehang-io.github.io/nps/" target="_blank" class="ks_btn" style="cursor: pointer;margin-left:5px;border:none" >手册</a>
+                              <a type="button" href="https://raw.githubusercontent.com/cdwangtao/koolshare_nps/master/Changelog.txt" target="_blank" class="ks_btn" style="cursor: pointer;margin-left:5px;border:none" >更新日志</a>
                               <a type="button" class="ks_btn" href="javascript:void(0);" onclick="get_log(1)" style="cursor: pointer;margin-left:5px;border:none">查看日志</a>
                             </div>
                           </td>

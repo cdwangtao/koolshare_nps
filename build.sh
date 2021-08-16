@@ -1,7 +1,7 @@
 #!/bin/sh
 
 MODULE="nps"
-VERSION="v0.26.10.4"
+VERSION="v1.1.1"
 TITLE="nps"
 DESCRIPTION="一款轻量级、高性能、功能强大的内网穿透代理服务器。"
 HOME_URL="Module_nps.asp"

@@ -168,14 +168,14 @@ install_now(){
   cp -rf /tmp/${module}/webs/* /koolshare/webs/
   cp -rf /tmp/${module}/uninstall.sh /koolshare/scripts/uninstall_${module}.sh
   if [ ! -d "/etc/${module}/" ];then
-    echo_date "文件[/etc/${module}/]不存在, 开始拷贝[/koolshare/res/${module}/]到[/etc/]"
-    # mkdir -p /etc/nps/
-	  # cp -rf /koolshare/res/${module}/* /etc/nps/
-	  cp -rf /koolshare/res/${module}/ /etc/
+    echo_date "nps固定的配置目录[/etc/${module}/]不存在, 开始创建[/etc/${module}/]目录，并拷贝[/koolshare/res/${module}/*]到[/etc/${module}/]"
+    mkdir -p /etc/${module}/
+	  cp -rf /koolshare/res/${module}/* /etc/${module}/
+	  # cp -rf /koolshare/res/${module}/ /etc/
   fi
-  pause "拷贝资源完成"
+  # pause "拷贝资源完成"
 
-  # 5.修改文件全选
+  # 5.修改文件权限 添加可执行权限
   # Permissions
   chmod 755 /koolshare/bin/* >/dev/null 2>&1
   chmod 755 /koolshare/scripts/* >/dev/null 2>&1
@@ -190,7 +190,7 @@ install_now(){
   # intall different UI
   install_ui
 
-  # 8.设置插件默认参数
+  # 8.设置插件默认参数1.软件中心参数
   # dbus value
   echo_date "设置插件默认参数..."
   dbus set ${module}_version="${PLVER}"
@@ -200,7 +200,7 @@ install_now(){
   dbus set softcenter_module_${module}_title="${TITLE}"
   dbus set softcenter_module_${module}_description="${DESCR}"
 
-  # 9.设置默认参数
+  # 9.设置插件默认参数2.默认值 插件版本-软件版本
   # defalut value
   local VERSION=$(cat $DIR/version)
   dbus set ${module}_version="${VERSION}"
@@ -256,7 +256,7 @@ install_now(){
     sh /koolshare/scripts/nps_config.sh restart
   fi
   
-  # 11.完成插件安装
+  # 11.完成插件安装 推出安装 删除临时文件
   # finish
   echo_date "${TITLE}插件安装完毕！"
   exit_install
