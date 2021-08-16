@@ -6,7 +6,7 @@ nps server for Koolshare
 
 本插件参考了[frps插件](https://github.com/koolshare/rogsoft)的代码，根据[nps插件](https://github.com/ehang-io/nps)编译好的的包，进行封装成路由器插件。
 
-本机基于AX86U进行测试，适用于koolshare 梅林改/官改 hnd/axhnd/axhnd.675x固件平台，其他机型未测试。
+本机基于AX86U进行测试，适用于koolshare 梅林改/官改 hnd/axhnd/axhnd.675x固件平台，优化插件兼容armv7，手中没有armv7路由器，欢迎测试反馈。
 
 这是本人第一次尝试编写路由器插件，本打算开发自用的，现在分享出来，如果能帮到大家，那就更好了。
 
@@ -30,6 +30,9 @@ Koolshare Nps Changelog
     - 2.建议开启[定时备份配置]功能，开启后，会定时检查配置文件是否变化，如果有变化实时备份配置文件。
 - 2020-08-16: v1.1.2
   - 优化重启路由后，页面为空的问题
+- 2020-08-16: v1.2.1
+  - 优化插件兼容armv7，手中没有armv7路由器，欢迎测试反馈
+  - 面板证书和域名解析的默认证书，支持设置web面板访问前缀，支持证书文本自动转换为文件路径。
 
 
 ## 运行图：

@@ -55,7 +55,11 @@ platform_test(){
   if [ -d "/koolshare" -a -f "/usr/bin/skipd" -a "${LINUX_VER}" -ge "41" ];then
     echo_date 机型："${MODEL} ${FW_TYPE_NAME} 符合安装要求，开始安装插件！"
   else
-    exit_install 1
+    if [ -d "/koolshare" -a -f "/usr/bin/skipd" -a "${LINUX_VER}" -eq "26" ];then
+      echo_date 机型："${MODEL} ${FW_TYPE_NAME} 符合安装要求，开始安装插件！"
+    else
+      exit_install 1
+    fi
   fi
 }
 
@@ -247,8 +251,26 @@ install_now(){
   if [ "$(dbus get ${module}_common_cron2_time)" == "" ];then
     dbus set ${module}_common_cron2_time="5"
   fi
+  # 增强参数
+  if [ "$(dbus get ${module}_common_https_default_key_file)" == "" ];then
+    dbus set ${module}_common_https_default_key_file="/koolshare/configs/nps/https_default_key_file.key"
+  fi
+  if [ "$(dbus get ${module}_common_https_default_cert_file)" == "" ];then
+    dbus set ${module}_common_https_default_cert_file="/koolshare/configs/nps/https_default_cert_file.pem"
+  fi
+  if [ "$(dbus get ${module}_common_web_base_url)" == "" ];then
+    dbus set ${module}_common_web_base_url=""
+  fi
+  if [ "$(dbus get ${module}_common_web_open_ssl)" == "" ];then
+    dbus set ${module}_common_web_open_ssl="false"
+  fi
+  if [ "$(dbus get ${module}_common_web_key_file)" == "" ];then
+    dbus set ${module}_common_web_key_file="/koolshare/configs/nps/web_key_file.key"
+  fi
+  if [ "$(dbus get ${module}_common_web_cert_file)" == "" ];then
+    dbus set ${module}_common_web_cert_file="/koolshare/configs/nps/web_cert_file.pem"
+  fi
   
-
   # 10.安装完毕 重启插件
   # re-enable
   if [ "${ENABLE}" == "1" -a -f "/koolshare/scripts/${module}_config.sh" ];then

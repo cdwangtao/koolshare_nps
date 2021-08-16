@@ -87,8 +87,8 @@ http_proxy_port=${nps_common_http_proxy_port}
 https_proxy_port=${nps_common_https_proxy_port}
 https_just_proxy=true
 #default https certificate setting
-https_default_cert_file=conf/server.pem
-https_default_key_file=conf/server.key
+https_default_cert_file=${nps_common_https_default_cert_file}
+https_default_key_file=${nps_common_https_default_key_file}
 
 ##bridge
 bridge_type=tcp
@@ -120,10 +120,10 @@ web_username=${nps_common_web_username}
 web_password=${nps_common_web_password}
 web_port=${nps_common_web_port}
 web_ip=0.0.0.0
-web_base_url=
-web_open_ssl=false
-web_cert_file=conf/server.pem
-web_key_file=conf/server.key
+web_base_url=${nps_common_web_base_url}
+web_open_ssl=${nps_common_web_open_ssl}
+web_cert_file=${nps_common_web_cert_file}
+web_key_file=${nps_common_web_key_file}
 # if web under proxy use sub path. like http://host/nps need this.
 #web_base_url=/nps
 
@@ -183,6 +183,19 @@ disconnect_timeout=60
 	fi
   # wt增强1.还原配置文件 参数1(是否比较时间拷贝文件 1:比较时间 0:不比较)
   on_restore_conf 0
+  # 4个ssl文件默认值
+  if [ ! -f "${CONF_BAK_DIR}/https_default_key_file.key" ];then
+    cp -rf ${CONF_BAKALL_DIR}/server.key ${CONF_BAK_DIR}/https_default_key_file.key
+	fi
+  if [ ! -f "${CONF_BAK_DIR}/https_default_cert_file.pem" ];then
+    cp -rf ${CONF_BAKALL_DIR}/server.pem ${CONF_BAK_DIR}/https_default_cert_file.pem
+	fi
+  if [ ! -f "${CONF_BAK_DIR}/web_key_file.key" ];then
+    cp -rf ${CONF_BAKALL_DIR}/server.key ${CONF_BAK_DIR}/web_key_file.key
+	fi
+  if [ ! -f "${CONF_BAK_DIR}/web_cert_file.pem" ];then
+    cp -rf ${CONF_BAKALL_DIR}/server.pem ${CONF_BAK_DIR}/web_cert_file.pem
+	fi
 
 	# 定时任务 1
 	if [ "${nps_common_cron_time}" == "0" ]; then
@@ -371,6 +384,42 @@ on_back_conf() {
     cp -rf "${CONF_REAL_DIR}/tasks.json"   "${CONF_BAK_DIR}/tasks.json"
 	fi
 }
+# wt增强3.web提交时 更新ssl
+on_web_submit_updatessl() {
+  # echo_date "web提交时 更新ssl"
+  echo_date "web提交时 更新ssl" | tee -a $LOG_FILE
+  nps_common_https_default_key_file="$(dbus get nps_common_https_default_key_file)"
+  nps_common_https_default_cert_file="$(dbus get nps_common_https_default_cert_file)"
+  nps_common_web_key_file="$(dbus get nps_common_web_key_file)"
+  nps_common_web_cert_file="$(dbus get nps_common_web_cert_file)"
+  # [[ $str == h*]] # ==比较
+  # [[ "$str" =~ ^he.* ]] # =~正则比较
+  # [[ "$str" =~ ^"${JAR_NAME}".* ]] # 包含变量时，变量使用双引号括起来
+  if [[ "${nps_common_https_default_key_file:0:1}" != "/" ]]; then
+    echo_date "转换密钥文本为文件:[https_default_key_file.key]" | tee -a $LOG_FILE
+    echo -e "${nps_common_https_default_key_file}">${CONF_BAK_DIR}/https_default_key_file.key
+    nps_common_https_default_key_file="/koolshare/configs/nps/https_default_key_file.key"
+    dbus set nps_common_https_default_key_file="/koolshare/configs/nps/https_default_key_file.key"
+	fi
+  if [[ "${nps_common_https_default_cert_file:0:1}" != "/" ]]; then
+    echo_date "转换证书文本为文件:[https_default_cert_file.pem]" | tee -a $LOG_FILE
+    echo -e "${nps_common_https_default_cert_file}">${CONF_BAK_DIR}/https_default_cert_file.pem
+    nps_common_https_default_cert_file="/koolshare/configs/nps/https_default_cert_file.pem"
+    dbus set nps_common_https_default_cert_file="/koolshare/configs/nps/https_default_cert_file.pem"
+	fi
+  if [[ "${nps_common_web_key_file:0:1}" != "/" ]]; then
+    echo_date "转换密钥文本为文件:[web_key_file.key]" | tee -a $LOG_FILE
+    echo -e "${nps_common_web_key_file}">${CONF_BAK_DIR}/web_key_file.key
+    nps_common_web_key_file="/koolshare/configs/nps/web_key_file.key"
+    dbus set nps_common_web_key_file="/koolshare/configs/nps/web_key_file.key"
+	fi
+  if [[ "${nps_common_web_cert_file:0:1}" != "/" ]]; then
+    echo_date "转换证书文本为文件:[web_cert_file.pem]" | tee -a $LOG_FILE
+    echo -e "${nps_common_web_cert_file}">${CONF_BAK_DIR}/web_cert_file.pem
+    nps_common_web_cert_file="/koolshare/configs/nps/web_cert_file.pem"
+    dbus set nps_common_web_cert_file="/koolshare/configs/nps/web_cert_file.pem"
+	fi
+}
 # wt增强3 比较两个文件时间并复制 
 compareTwoFileTimesAndCopy() {
   fileTimes1=$(date +%s -r ${1})
@@ -435,6 +484,9 @@ web_submit)
 	set_lock
   # 清空日志
   true > $LOG_FILE
+  # web提交时 更新ssl
+  echo "111.web提交时 更新ssl" >> $LOG_FILE
+  on_web_submit_updatessl
 	http_response "$1"
 	if [ "${nps_enable}" == "1" ]; then
 		stop | tee -a $LOG_FILE

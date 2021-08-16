@@ -86,7 +86,14 @@ var params_input = [
   "nps_common_cron_time",
   "nps_common_cron_hour_min",
   "nps_common_cron2_time",
-  "nps_common_cron2_hour_min"
+  "nps_common_cron2_hour_min",
+
+  "nps_common_https_default_key_file",
+  "nps_common_https_default_cert_file",
+  "nps_common_web_base_url",
+  "nps_common_web_open_ssl",
+  "nps_common_web_key_file",
+  "nps_common_web_cert_file"
 ];
 
 var params_check = ["nps_enable"];
@@ -165,6 +172,13 @@ function save() {
     || !E(nps_common_cron_hour_min).value
     || !E(nps_common_cron2_time).value
     || !E(nps_common_cron2_hour_min).value
+    
+    || !E(nps_common_https_default_key_file).value
+    || !E(nps_common_https_default_cert_file).value
+    // || !E(nps_common_web_base_url).value
+    || !E(nps_common_web_open_ssl).value
+    || !E(nps_common_web_key_file).value
+    || !E(nps_common_web_cert_file).value
   ){
     alert("提交的表单不能为空!");
     return false;
@@ -411,7 +425,7 @@ function get_log(action){
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(2)">web端口</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(2)">web面板端口</a></th>
                           <td>
                             <input type="text" class="input_ss_table" value="" id="nps_common_web_port" name="nps_common_web_port" maxlength="5" value="" placeholder=""/>
                           </td>
@@ -464,113 +478,47 @@ function get_log(action){
                             </select>
                           </td>
                         </tr>
-                        <!-- 
+
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(1)">Dashboard port</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">https默认密钥(KEY)</a></th>
                           <td>
-                            <input type="text" class="input_ss_table" value="" id="nps_common_dashboard_port" name="nps_common_dashboard_port" maxlength="5" value="" placeholder=""/>
+                            <textarea id="nps_common_https_default_key_file" placeholder="密钥路径 或 以[-----BEGIN RSA PRIVATE KEY-----]开头文本，输入文本会自动转换为路径" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin:0px 0px 0px 2px;width: 97%;height: 60px;" rows="8"></textarea>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(11)">Dashboard User</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">https默认证书(PEM格式)</a></th>
                           <td>
-                        <input type="text" class="input_ss_table" id="nps_common_dashboard_user" name="nps_common_dashboard_user" maxlength="50" value="" />
+                            <textarea id="nps_common_https_default_cert_file" placeholder="证书路径 或 以[-----BEGIN CERTIFICATE-----]开头开头文本，输入文本会自动转换为路径" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin:0px 0px 0px 2px;width: 97%;height: 60px;" rows="8"></textarea>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(3)">Dashboard Pass</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(1)">web面板访问前缀</a></th>
                           <td>
-                            <input type="password" name="nps_common_dashboard_pwd" id="nps_common_dashboard_pwd" class="input_ss_table" autocomplete="new-password" autocorrect="off" autocapitalize="off" maxlength="256" value="" onBlur="switchType(this, false);" onFocus="switchType(this, true);"/>
+                            <input type="text" class="input_ss_table" value="" id="nps_common_web_base_url" name="nps_common_web_base_url" maxlength="5" value="" placeholder=""/>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(2)">Bind port</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">开启web面板https访问</a></th>
                           <td>
-                        <input type="text" class="input_ss_table" id="nps_common_bind_port" name="nps_common_bind_port" maxlength="5" value="" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(3)">Privilege Token</a></th>
-                          <td>
-                            <input type="password" name="nps_common_privilege_token" id="nps_common_privilege_token" class="input_ss_table" autocomplete="new-password" autocorrect="off" autocapitalize="off" maxlength="256" value="" onBlur="switchType(this, false);" onFocus="switchType(this, true);"/>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(4)">vhost http port</a></th>
-                          <td>
-                            <input type="text" class="input_ss_table" id="nps_common_vhost_http_port" name="nps_common_vhost_http_port" maxlength="6" value="" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(5)">vhost https port</a></th>
-                          <td>
-                            <input type="text" class="input_ss_table" id="nps_common_vhost_https_port" name="nps_common_vhost_https_port" maxlength="6" value="" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(13)">TCP 多路复用</a></th>
-                          <td>
-                            <select id="nps_common_tcp_mux" name="nps_common_tcp_mux" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
+                            <select id="nps_common_web_open_ssl" name="nps_common_web_open_ssl" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
                               <option value="true">开启</option>
                               <option value="false">关闭</option>
                             </select>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(6)">日志记录</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">web面板密钥(KEY)</a></th>
                           <td>
-                            <select id="nps_common_log_file" name="nps_common_log_file" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
-                              <option value="/tmp/nps.log">开启</option>
-                              <option value="/dev/null">关闭</option>
-                            </select>
+                            <textarea id="nps_common_web_key_file" placeholder="密钥路径 或 以[-----BEGIN RSA PRIVATE KEY-----]开头文本，输入文本会自动转换为路径" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin:0px 0px 0px 2px;width: 97%;height: 60px;" rows="8"></textarea>
                           </td>
                         </tr>
                         <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(7)">日志等级</a></th>
+                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">web面板证书(PEM格式)</a></th>
                           <td>
-                            <select id="nps_common_log_level" name="nps_common_log_level" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
-                              <option value="info">info</option>
-                              <option value="warn">warn</option>
-                              <option value="error">error</option>
-                              <option value="debug">debug</option>
-                            </select>
+                            <textarea id="nps_common_web_cert_file" placeholder="证书路径 或 以[-----BEGIN CERTIFICATE-----]开头开头文本，输入文本会自动转换为路径" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin:0px 0px 0px 2px;width: 97%;height: 60px;" rows="8"></textarea>
                           </td>
                         </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(8)">日志记录天数</a></th>
-                          <td>
-                            <select id="nps_common_log_max_days" name="nps_common_log_max_days" style="width:165px;margin:0px 0px 0px 2px;" class="input_option" >
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3" selected="selected">3</option>
-                              <option value="4">4</option>
-                              <option value="5">6</option>
-                              <option value="6">6</option>
-                              <option value="7">7</option>
-                              <option value="30">30</option>
-                            </select>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(9)">max pool count</a></th>
-                          <td>
-                            <select id="nps_common_max_pool_count" name="nps_common_max_pool_count" style="width:60px;margin:3px 2px 0px 2px;" class="input_option">
-                              <option value="10">10</option>
-                              <option value="20">20</option>
-                              <option value="30">30</option>
-                              <option value="40">40</option>
-                              <option value="50" selected="selected">50</option>
-                              <option value="60">60</option>
-                              <option value="70">70</option>
-                              <option value="80">80</option>
-                              <option value="90">90</option>
-                              <option value="100">100</option>
-                              <option value="150">150</option>
-                              <option value="200">200</option>
-                            </select>
-                          </td>
-                        </tr>
-                        -->
+                        
                         <tr>
                           <th width="20%"><a class="hintstyle" href="javascript:void(0);" onclick="openssHint(10)">定时重启服务</a>(<i>0为关闭</i>)</th>
                           <td>
