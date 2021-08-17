@@ -35,4 +35,4 @@ Koolshare Nps Changelog
 
 ## 运行图：
 
-![Snipaste_2021-08-16_13-08-41](doc/run2.png)
+![run2](doc/run.png)
